@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Streamlit secrets (contains sensitive credentials)
+.streamlit/secrets.toml
