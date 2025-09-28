@@ -6,12 +6,11 @@ import plotly.express as px
 
 # Page configuration
 st.set_page_config(
-    page_title="Portfolio Tracker",
-    page_icon="📈",
-    layout="wide"
+    page_title="Andrei's Portfolio",
+    page_icon="📈"
 )
 
-st.title("📈 Portfolio Tracker")
+st.title("📈 Andrei's Portfolio")
 
 # Create connection to Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -38,10 +37,12 @@ def load_performance_data():
     """Load monthly performance data from Performance sheet"""
     try:
         df = conn.read(ttl="10m", worksheet="Performance")
-        if not df.empty and 'Date' in df.columns and 'Portfolio_Value' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'])
-            df = df.sort_values('Date')
-            return df
+        if not df.empty:
+            required_cols = ['Date', 'Portfolio_Value', 'Portfolio_Beta', '%_Cash']
+            if all(col in df.columns for col in required_cols):
+                df['Date'] = pd.to_datetime(df['Date'])
+                df = df.sort_values('Date')
+                return df
     except:
         pass
     return None
@@ -58,60 +59,92 @@ def load_portfolio_summary():
         pass
     return None
 
+def get_latest_performance_metrics():
+    """Get the latest performance metrics from the most recent date"""
+    performance_df = load_performance_data()
+    if performance_df is not None and not performance_df.empty:
+        # Get the row with the maximum date
+        latest_row = performance_df.loc[performance_df['Date'].idxmax()]
+
+        # Convert to numeric values to handle string data from sheets
+        try:
+            # Debug: Check what we're getting from the sheet
+            portfolio_value = pd.to_numeric(str(latest_row['Portfolio_Value']).replace(',', '').replace('$', ''), errors='coerce')
+            portfolio_beta = pd.to_numeric(str(latest_row['Portfolio_Beta']).replace(',', ''), errors='coerce')
+            cash_pct = pd.to_numeric(str(latest_row['%_Cash']).replace('%', '').replace(',', ''), errors='coerce')
+
+            return {
+                'Portfolio_Value': portfolio_value if pd.notna(portfolio_value) else 0,
+                'Portfolio_Beta': portfolio_beta if pd.notna(portfolio_beta) else 0,
+                'Cash_Pct': cash_pct if pd.notna(cash_pct) else 0,
+                'Date': latest_row['Date']
+            }
+        except Exception as e:
+            return None
+    return None
+
 try:
     # Load all data
     holdings_df = load_portfolio_data()
     performance_df = load_performance_data()
     summary_df = load_portfolio_summary()
+    latest_metrics = get_latest_performance_metrics()
 
-    # Calculate total portfolio value
-    total_value = 0
-    if holdings_df is not None:
-        # Use Value column directly since we now require it
-        total_value = holdings_df['Value'].sum()
-    elif summary_df is not None:
-        total_value = summary_df['Value'].sum()
+    # Add date indicator right below title
+    if latest_metrics:
+        st.caption(f"📅 Data as of {latest_metrics['Date'].strftime('%B %d, %Y')}")
+    else:
+        st.caption("📅 Performance data not available")
 
     # === HOMEPAGE LAYOUT ===
 
-    # 1. Total Portfolio Value (Hero Section)
-    st.markdown("### 💰 Total Portfolio Value")
-    if total_value > 0:
-        st.metric(
-            label="",
-            value=f"${total_value:,.2f}",
-            delta=None
-        )
+    # 1. Portfolio Summary
+    st.markdown("### 📊 Portfolio Summary")
+    col1, col2, col3 = st.columns(3)
+
+    if latest_metrics:
+        with col1:
+            st.metric(
+                label="Total Value",
+                value=f"${latest_metrics['Portfolio_Value']:,.0f}",
+                delta=None
+            )
+
+        with col2:
+            st.metric(
+                label="Beta",
+                value=f"{latest_metrics['Portfolio_Beta']:.2f}",
+                delta=None
+            )
+
+        with col3:
+            st.metric(
+                label="% in Cash",
+                value=f"{latest_metrics['Cash_Pct']:.1f}%",
+                delta=None
+            )
     else:
-        st.warning("Portfolio value data not available")
+        with col1:
+            st.metric(
+                label="Total Value",
+                value="--",
+                delta=None
+            )
 
-    # Asset Allocation Pie Chart
-    st.markdown("### 🥧 Asset Allocation")
-    if holdings_df is not None:
-        # Calculate Asset_Group allocation
-        asset_allocation = holdings_df.groupby('Asset_Group')['Value'].sum().reset_index()
-        asset_allocation['Percentage'] = (asset_allocation['Value'] / asset_allocation['Value'].sum() * 100).round(1)
+        with col2:
+            st.metric(
+                label="Beta",
+                value="--",
+                delta=None
+            )
 
-        if not asset_allocation.empty:
-            # Create pie chart using Plotly
-            fig = px.pie(asset_allocation,
-                        values='Value',
-                        names='Asset_Group',
-                        title='Portfolio Asset Allocation')
-            fig.update_traces(textposition='inside', textinfo='percent+label')
-            st.plotly_chart(fig, use_container_width=True)
+        with col3:
+            st.metric(
+                label="% in Cash",
+                value="--",
+                delta=None
+            )
 
-            # Show allocation table
-            col1, col2 = st.columns(2)
-            with col1:
-                display_allocation = asset_allocation.copy()
-                display_allocation['Value'] = display_allocation['Value'].apply(lambda x: f"${x:,.0f}")
-                display_allocation['Percentage'] = display_allocation['Percentage'].apply(lambda x: f"{x}%")
-                st.dataframe(display_allocation, use_container_width=True, hide_index=True)
-        else:
-            st.info("No asset allocation data available")
-    else:
-        st.info("📊 Holdings data needed to show asset allocation")
 
     st.markdown("---")
 
@@ -130,18 +163,60 @@ try:
         else:
             st.info("📅 No performance data available from January 1, 2025. Add monthly data to the 'Performance' sheet with columns: Date, Portfolio_Value")
     else:
-        st.info("📊 Create a 'Performance' sheet with columns 'Date' and 'Portfolio_Value' to track monthly performance")
+        st.info("📊 Create a 'Performance' sheet with columns: Date, Portfolio_Value, Portfolio_Beta, %_Cash to track monthly performance")
 
     st.markdown("---")
 
-    # 3. Portfolio Details Table
+    # 3. Asset Allocation Pie Chart
+    st.markdown("### 🥧 Asset Allocation")
+    if holdings_df is not None:
+        # Convert Value column to numeric to handle string data from sheets
+        holdings_df_numeric = holdings_df.copy()
+        holdings_df_numeric['Value'] = pd.to_numeric(holdings_df_numeric['Value'], errors='coerce').fillna(0)
+
+        # Calculate Asset_Group allocation
+        asset_allocation = holdings_df_numeric.groupby('Asset_Group')['Value'].sum().reset_index()
+        asset_allocation['Percentage'] = (asset_allocation['Value'] / asset_allocation['Value'].sum() * 100).round(1)
+
+        if not asset_allocation.empty and asset_allocation['Value'].sum() > 0:
+            # Create pie chart using Plotly
+            fig = px.pie(asset_allocation,
+                        values='Value',
+                        names='Asset_Group',
+                        title='Portfolio Asset Allocation')
+            fig.update_traces(textposition='inside', textinfo='percent+label')
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Show allocation table
+            col1, col2 = st.columns(2)
+            with col1:
+                display_allocation = asset_allocation.copy()
+                display_allocation['Value'] = display_allocation['Value'].apply(lambda x: f"${float(x):,.0f}")
+                display_allocation['Percentage'] = display_allocation['Percentage'].apply(lambda x: f"{float(x)}%")
+                st.dataframe(display_allocation, use_container_width=True, hide_index=True)
+        else:
+            st.info("No asset allocation data available")
+    else:
+        st.info("📊 Holdings data needed to show asset allocation")
+
+    st.markdown("---")
+
+    # 4. Portfolio Details Table
     st.markdown("### 📋 Portfolio Details")
 
     if summary_df is not None:
-        # Format the data for display
+        # Simple formatting for display
         display_df = summary_df.copy()
-        display_df['Value'] = display_df['Value'].apply(lambda x: f"${x:,.2f}")
-        display_df['Beta'] = display_df['Beta'].apply(lambda x: f"{x:.2f}")
+
+        # Format Value as currency
+        if 'Value' in display_df.columns:
+            display_df['Value'] = pd.to_numeric(display_df['Value'], errors='coerce')
+            display_df['Value'] = display_df['Value'].apply(lambda x: f"${x:,.2f}" if pd.notna(x) else x)
+
+        # Format Beta to 2 decimal places
+        if 'Beta' in display_df.columns:
+            display_df['Beta'] = pd.to_numeric(display_df['Beta'], errors='coerce')
+            display_df['Beta'] = display_df['Beta'].apply(lambda x: f"{x:.2f}" if pd.notna(x) else x)
 
         st.dataframe(display_df, use_container_width=True, hide_index=True)
     else:
@@ -161,7 +236,7 @@ try:
 
         with col2:
             st.markdown("**📈 Performance Sheet:**")
-            st.code("Date | Portfolio_Value")
+            st.code("Date | Portfolio_Value | Portfolio_Beta | %_Cash")
 
         with col3:
             st.markdown("**📋 Summary Sheet:**")
