@@ -111,3 +111,34 @@ def preprocess_portfolio_metrics(all_data: Dict[str, pd.DataFrame]) -> Dict[str,
             metrics['index_performance_by_date'][date] = index_data
 
     return metrics
+
+
+def prepare_portfolio_performance_data(all_data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Prepare portfolio data for stacked bar chart showing group allocation over time"""
+    portfolios_df = all_data['portfolios']
+
+    if portfolios_df.empty:
+        return pd.DataFrame()
+
+    # Convert date column to datetime
+    portfolios_df = portfolios_df.copy()
+    portfolios_df['date'] = pd.to_datetime(portfolios_df['date'])
+
+    # Convert balance to numeric
+    portfolios_df['balance'] = pd.to_numeric(portfolios_df['balance'], errors='coerce').fillna(0)
+
+    # Group by date and group, summing the balances
+    grouped_data = portfolios_df.groupby(['date', 'group'])['balance'].sum().reset_index()
+
+    # Calculate total portfolio value by date for percentage calculation
+    total_by_date = grouped_data.groupby('date')['balance'].sum().reset_index()
+    total_by_date.columns = ['date', 'total_balance']
+
+    # Merge to get percentages
+    grouped_data = grouped_data.merge(total_by_date, on='date')
+    grouped_data['percentage'] = (grouped_data['balance'] / grouped_data['total_balance'] * 100).round(1)
+
+    # Sort by date for proper chart display
+    grouped_data = grouped_data.sort_values('date')
+
+    return grouped_data

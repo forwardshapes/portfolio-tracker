@@ -5,7 +5,7 @@ from datetime import datetime, date
 import plotly.express as px
 
 # Import custom modules
-from modules.data_loader import load_all_sheets_data, preprocess_portfolio_metrics
+from modules.data_loader import load_all_sheets_data, preprocess_portfolio_metrics, prepare_portfolio_performance_data
 from modules.portfolio_metrics import (
     calculate_total_portfolio_value,
     calculate_cash_percentage,
@@ -32,6 +32,13 @@ def get_portfolio_data():
     """Cached wrapper for loading and preprocessing portfolio data"""
     all_sheets_data = load_all_sheets_data(conn)
     return preprocess_portfolio_metrics(all_sheets_data)
+
+# Cached performance data wrapper
+@st.cache_data(ttl="10m")
+def get_performance_data():
+    """Cached wrapper for loading performance chart data"""
+    all_sheets_data = load_all_sheets_data(conn)
+    return prepare_portfolio_performance_data(all_sheets_data)
 
 # Load all data and preprocess metrics
 portfolio_metrics = get_portfolio_data()
@@ -109,12 +116,56 @@ else:
 
 st.markdown("---")
 
-# 2. Monthly Performance Chart
-st.markdown("### 📊 Portfolio Performance (2025)")
-if selected_date:
-    st.info(f"📊 Performance chart for {selected_date.strftime('%B %d, %Y')} will be displayed here once data is loaded")
+# 2. Portfolio Performance Chart
+st.markdown("### 📊 Portfolio Performance Over Time")
+
+# Load performance data
+performance_data = get_performance_data()
+
+if not performance_data.empty:
+    # Create stacked bar chart showing dollar allocation by group over time
+    fig = px.bar(performance_data,
+                x='date',
+                y='balance',
+                color='group',
+                title='Portfolio Value by Group ($)',
+                labels={'balance': 'Value ($)', 'date': 'Date'},
+                hover_data={'percentage': ':.1f'},
+                text='balance')
+
+    # Update layout for better display
+    fig.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Value ($)",
+        legend_title="Group",
+        barmode='stack',
+        height=400
+    )
+
+    # Format y-axis to show currency
+    fig.update_yaxes(tickformat='$,.0f')
+
+    # Format text labels inside bars to show currency
+    fig.update_traces(texttemplate='$%{text:,.0f}', textposition='inside')
+
+    # Format dates on x-axis
+    fig.update_xaxes(tickformat='%b %d')
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Show summary table below the chart
+    if selected_date and selected_date in performance_data['date'].values:
+        selected_data = performance_data[performance_data['date'] == selected_date].copy()
+        if not selected_data.empty:
+            selected_data = selected_data[['group', 'balance', 'percentage']].sort_values('balance', ascending=False)
+            selected_data['balance'] = selected_data['balance'].apply(lambda x: f"${x:,.0f}")
+            selected_data['percentage'] = selected_data['percentage'].apply(lambda x: f"{x}%")
+            selected_data.columns = ['Group', 'Balance', 'Percentage']
+
+            st.markdown(f"**Allocation for {selected_date.strftime('%B %d, %Y')}:**")
+            st.dataframe(selected_data, use_container_width=True, hide_index=True)
 else:
-    st.info("📊 Select a date to view performance chart")
+    st.info("📊 No portfolio performance data available")
 
 st.markdown("---")
 
