@@ -27,9 +27,8 @@ Always use uv (Python package manager).
 
 ## Tech Values
 
-* Minimal dependencies & modules
-* If a new module is needed, use a popular module that is lightweight and secure
 * Production ready code that is lighting fast, secure, and easy to maintain  
 * DRY principle (no duplicate data maintenance)  
 * Less code (fewer lines to maintain)
+* If a new module is needed, use a popular module that is lightweight and secure
 
