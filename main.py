@@ -14,14 +14,18 @@ from modules.portfolio_metrics import (
 )
 from modules.utils import format_currency, format_dataframe_for_display, capitalize_column_names
 
+# Get portfolio owner name from secrets (optional)
+portfolio_owner_name = st.secrets["connections"]["gsheets"].get("portfolio_owner_name", "")
+portfolio_title = f"{portfolio_owner_name}'s Portfolio" if portfolio_owner_name else "Portfolio Tracker"
+
 # Page configuration
 st.set_page_config(
-    page_title="Andrei's Portfolio",
+    page_title=portfolio_title,
     page_icon="📈",
     layout="wide"
 )
 
-st.title("📈 Andrei's Portfolio")
+st.title(f"📈 {portfolio_title}")
 
 # Create connection to Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
@@ -117,7 +121,7 @@ else:
 st.markdown("---")
 
 # 2. Portfolio Performance Chart
-st.markdown("### 📊 Portfolio Performance Over Time")
+st.markdown("### 📊 Portfolio Value Over Time")
 
 # Load performance data
 performance_data = get_performance_data()
@@ -244,12 +248,23 @@ st.markdown("### 📋 Portfolio Details")
 if selected_date:
     index_data = portfolio_metrics['index_performance_by_date'].get(selected_date)
     if index_data is not None and not index_data.empty:
-        # Find S&P 500 data and display in simplified format
+        # Find S&P 500 and NASDAQ data and display in simplified format
         sp500_row = index_data[index_data['index'].str.lower() == 'sp500']
+        nasdaq_row = index_data[index_data['index'].str.lower() == 'nasdaq']
+
+        returns_list = []
         if not sp500_row.empty:
-            ytd_return = sp500_row.iloc[0]['return_pct_ytd'] * 100  # Convert to percentage
+            sp500_ytd = sp500_row.iloc[0]['return_pct_ytd'] * 100  # Convert to percentage
+            returns_list.append(f"S&P 500: {sp500_ytd:.2f}%")
+
+        if not nasdaq_row.empty:
+            nasdaq_ytd = nasdaq_row.iloc[0]['return_pct_ytd'] * 100  # Convert to percentage
+            returns_list.append(f"NASDAQ: {nasdaq_ytd:.2f}%")
+
+        if returns_list:
+            index_text = " | ".join(returns_list)
             st.markdown(
-                f"<small style='color: gray;'>S&P 500 (YTD Return): {ytd_return:.2f}%</small>",
+                f"<small style='color: gray;'><b>YTD Returns:</b> {index_text}</small>",
                 unsafe_allow_html=True
             )
 
