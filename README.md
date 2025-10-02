@@ -138,16 +138,6 @@ The app uses Streamlit's `@st.cache_data` decorator with a 10-minute TTL to mini
 **Issue**: "No dates available from portfolios sheet"
 - **Solution**: Check that your Google Sheet has a `portfolios` worksheet with a `date` column
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
