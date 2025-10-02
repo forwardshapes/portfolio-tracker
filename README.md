@@ -144,14 +144,15 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Acknowledgments
 
+- Built with [Claude Code](https://www.claude.com/product/claude-code)
 - Built with [Streamlit](https://streamlit.io/)
 - Visualizations powered by [Plotly](https://plotly.com/)
 - Google Sheets integration via [st-gsheets-connection](https://github.com/streamlit/gsheets-connection)
-- Built with [Claude Code](https://www.claude.com/product/claude-code)
+
 
 ## Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/yourusername/portfolio-tracker/issues) on GitHub.
+If you encounter any issues or have questions, please open an issue on GitHub.
 
 ---
 
