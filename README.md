@@ -74,7 +74,7 @@ A Streamlit web application for tracking a personal investment portfolio using G
 
 ## Google Sheets Template
 
-Make a copy of this [Google Sheets template](https://docs.google.com/spreadsheets/d/1bejdPXweFLePzXjy_LEjYyflpRWbxbdDiGrs7d-nCJA/edit?gid=0#gid=0). 
+Make a copy of this [Google Sheets template](https://docs.google.com/spreadsheets/d/1bejdPXweFLePzXjy_LEjYyflpRWbxbdDiGrs7d-nCJA/edit?gid=0#gid=0) 
 
 Go to **File → Make a copy** to save it to your own Google Drive.
 
