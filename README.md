@@ -20,7 +20,7 @@ A Streamlit web application for tracking a personal investment portfolio using G
 ## Screenshots
 
 **Portfolio Summary**
-![Portfolio Summary](https://tradingnotions.com/wp-content/uploads/2025/10/01-portfolio-summary.png)
+![Portfolio Summary](https://tradingnotions.com/wp-content/uploads/2025/10/01-portfolio-summary2.png)
 
 **Portfolio Value over time**
 ![Portfolio Summary](https://tradingnotions.com/wp-content/uploads/2025/10/02-portfolio-value-over-time.png)
