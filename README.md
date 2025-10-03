@@ -19,6 +19,8 @@ A Streamlit web application for tracking a personal investment portfolio using G
 
 ## Screenshots
 
+*Test data pulled from the [Google Sheets template](https://docs.google.com/spreadsheets/d/1bejdPXweFLePzXjy_LEjYyflpRWbxbdDiGrs7d-nCJA/edit?gid=0#gid=0)*
+
 **Portfolio Summary**
 ![Portfolio Summary](https://tradingnotions.com/wp-content/uploads/2025/10/01-portfolio-summary2.png)
 
