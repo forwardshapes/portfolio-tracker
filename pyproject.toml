@@ -11,8 +11,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/portfolio-tracker"
-Issues = "https://github.com/YOUR_USERNAME/portfolio-tracker/issues"
+Homepage = "https://github.com/forwardshapes/portfolio-tracker"
+Issues = "https://github.com/forwardshapes/portfolio-tracker/issues"
 
 [tool.uv]
 dev-dependencies = []

@@ -41,7 +41,7 @@ A Streamlit web application for tracking a personal investment portfolio using G
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/portfolio-tracker.git
+   git clone https://github.com/forwardshapes/portfolio-tracker.git
    cd portfolio-tracker
    ```
 
