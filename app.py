@@ -5,14 +5,14 @@ from datetime import datetime, date
 import plotly.express as px
 
 # Import custom modules
-from modules.data_loader import load_all_sheets_data, preprocess_portfolio_metrics, prepare_portfolio_performance_data
-from modules.portfolio_metrics import (
+from src.portfolio_tracker.data_loader import load_all_sheets_data, preprocess_portfolio_metrics, prepare_portfolio_performance_data
+from src.portfolio_tracker.portfolio_metrics import (
     calculate_total_portfolio_value,
     calculate_cash_percentage,
     calculate_portfolio_beta,
     get_sp500_performance
 )
-from modules.utils import format_currency, format_dataframe_for_display, capitalize_column_names
+from src.portfolio_tracker.utils import format_currency, format_dataframe_for_display, capitalize_column_names
 
 # Get portfolio owner name from secrets (optional)
 portfolio_owner_name = st.secrets["connections"]["gsheets"].get("portfolio_owner_name", "")

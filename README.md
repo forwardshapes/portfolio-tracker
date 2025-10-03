@@ -83,7 +83,7 @@ Go to **File → Make a copy** to save it to your own Google Drive.
 Run the Streamlit app:
 
 ```bash
-uv run streamlit run main.py
+uv run streamlit run app.py
 ```
 
 The application will open in your default web browser at `http://localhost:8501`.
@@ -92,13 +92,14 @@ The application will open in your default web browser at `http://localhost:8501`
 
 ```
 portfolio-tracker/
-├── main.py                          # Main Streamlit application
-├── modules/
-│   ├── __init__.py
-│   ├── config.py                    # Configuration settings
-│   ├── data_loader.py               # Google Sheets data loading
-│   ├── portfolio_metrics.py         # Portfolio calculations
-│   └── utils.py                     # Utility functions
+├── app.py                           # Main Streamlit application
+├── src/
+│   └── portfolio_tracker/
+│       ├── __init__.py
+│       ├── config.py                # Configuration settings
+│       ├── data_loader.py           # Google Sheets data loading
+│       ├── portfolio_metrics.py     # Portfolio calculations
+│       └── utils.py                 # Utility functions
 ├── .streamlit/
 │   ├── secrets.toml.template        # Template for credentials
 │   └── secrets.toml                 # Your actual credentials (not in git)
@@ -118,10 +119,10 @@ portfolio-tracker/
 
 ### Adding New Features
 
-1. Data loading functions go in `modules/data_loader.py`
-2. Calculation logic goes in `modules/portfolio_metrics.py`
-3. Display formatting goes in `modules/utils.py`
-4. Configuration constants go in `modules/config.py`
+1. Data loading functions go in `src/portfolio_tracker/data_loader.py`
+2. Calculation logic goes in `src/portfolio_tracker/portfolio_metrics.py`
+3. Display formatting goes in `src/portfolio_tracker/utils.py`
+4. Configuration constants go in `src/portfolio_tracker/config.py`
 
 ### Caching
 

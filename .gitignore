@@ -11,7 +11,6 @@ wheels/
 
 # Streamlit secrets (contains sensitive credentials)
 .streamlit/secrets.toml
-.streamlit/
 
 # Other
 *.log

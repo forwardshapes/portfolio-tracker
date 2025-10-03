@@ -1,7 +1,7 @@
 [project]
 name = "portfolio-tracker"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Streamlit web app for tracking and visualizing investment portfolio performance using Google Sheets"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -9,3 +9,10 @@ dependencies = [
     "st-gsheets-connection>=0.1.0",
     "streamlit>=1.50.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/portfolio-tracker"
+Issues = "https://github.com/YOUR_USERNAME/portfolio-tracker/issues"
+
+[tool.uv]
+dev-dependencies = []
